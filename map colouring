@@ -1,0 +1,32 @@
+# Define the regions and neighbors
+regions = {
+    'A': ['B', 'C', 'D'],
+    'B': ['A', 'D'],
+    'C': ['A', 'D'],
+    'D': ['A', 'B', 'C', 'E'],
+    'E': ['D']
+}
+
+# Available colors
+colors = ['Red', 'Green', 'Blue']
+
+# Backtracking function to assign colors
+def color_map(assignment={}):
+    if len(assignment) == len(regions):  # All regions colored
+        return assignment
+    
+    region = next(r for r in regions if r not in assignment)  # Find uncolored region
+    
+    for color in colors:
+        if all(assignment.get(neigh) != color for neigh in regions[region]):  # Check constraints
+            assignment[region] = color
+            result = color_map(assignment)  # Recur
+            if result:
+                return result
+            del assignment[region]  # Backtrack
+    
+    return None
+
+
+solution = color_map()
+print("Solution:", solution if solution else "No solution found.")
