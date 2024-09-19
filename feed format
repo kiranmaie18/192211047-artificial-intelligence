@@ -1,0 +1,77 @@
+class Node:
+    def _init_(self, feature=None, threshold=None, left=None, right=None, value=None):
+        self.feature = feature
+        self.threshold = threshold
+        self.left = left
+        self.right = right
+        self.value = value
+
+def entropy(y):
+    from math import log2
+    proportions = [y.count(i) / len(y) for i in set(y)]
+    return -sum([p * log2(p) for p in proportions if p > 0])
+
+def split_dataset(X, y, feature, threshold):
+    left_X, left_y, right_X, right_y = [], [], [], []
+    for xi, yi in zip(X, y):
+        if xi[feature] <= threshold:
+            left_X.append(xi)
+            left_y.append(yi)
+        else:
+            right_X.append(xi)
+            right_y.append(yi)
+    return left_X, left_y, right_X, right_y
+
+def best_split(X, y):
+    best_feature, best_threshold, best_gain = None, None, -float('inf')
+    current_entropy = entropy(y)
+    n_features = len(X[0])
+    for feature in range(n_features):
+        thresholds = set([x[feature] for x in X])
+        for threshold in thresholds:
+            left_X, left_y, right_X, right_y = split_dataset(X, y, feature, threshold)
+            if len(left_y) > 0 and len(right_y) > 0:
+                p_left, p_right = len(left_y) / len(y), len(right_y) / len(y)
+                gain = current_entropy - p_left * entropy(left_y) - p_right * entropy(right_y)
+                if gain > best_gain:
+                    best_feature, best_threshold, best_gain = feature, threshold, gain
+    return best_feature, best_threshold
+
+def build_tree(X, y, depth=0, max_depth=5):
+    if len(set(y)) == 1 or depth == max_depth or len(X) == 0:
+        return Node(value=max(set(y), key=y.count))
+    
+    feature, threshold = best_split(X, y)
+    if feature is None:
+        return Node(value=max(set(y), key=y.count))
+    
+    left_X, left_y, right_X, right_y = split_dataset(X, y, feature, threshold)
+    left_node = build_tree(left_X, left_y, depth + 1, max_depth)
+    right_node = build_tree(right_X, right_y, depth + 1, max_depth)
+    return Node(feature=feature, threshold=threshold, left=left_node, right=right_node)
+
+def predict(tree, xi):
+    if tree.value is not None:
+        return tree.value
+    if xi[tree.feature] <= tree.threshold:
+        return predict(tree.left, xi)
+    else:
+        return predict(tree.right, xi)
+
+def accuracy(y_true, y_pred):
+    return sum([1 for yt, yp in zip(y_true, y_pred) if yt == yp]) / len(y_true)
+
+X = [
+    [2.7, 2.5],
+    [1.3, 1.2],
+    [3.5, 4.6],
+    [4.5, 5.1],
+    [2.1, 1.7],
+    [3.3, 3.7]
+]
+y = [0, 0, 1, 1, 0, 1]
+
+tree = build_tree(X, y)
+y_pred = [predict(tree, xi) for xi in X]
+
+print(f"Accuracy: {accuracy(y, y_pred)}")
