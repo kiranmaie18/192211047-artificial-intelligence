@@ -1,0 +1,31 @@
+def play_tennis(outlook, temperature, humidity, windy):
+    
+    if outlook == 'Sunny':
+       
+        if humidity == 'High':
+            return 'No'
+        else:
+            return 'Yes'
+    elif outlook == 'Overcast':
+        return 'Yes'
+    elif outlook == 'Rainy':
+        
+        if windy == True:
+            return 'No'
+        else:
+            return 'Yes'
+    else:
+        return 'Unknown'  
+
+
+weather_conditions = [
+    {'outlook': 'Sunny', 'temperature': 'Hot', 'humidity': 'High', 'windy': False},
+    {'outlook': 'Rainy', 'temperature': 'Mild', 'humidity': 'Normal', 'windy': False},
+    {'outlook': 'Overcast', 'temperature': 'Cool', 'humidity': 'Normal', 'windy': True},
+    {'outlook': 'Rainy', 'temperature': 'Cool', 'humidity': 'High', 'windy': True},
+]
+
+
+for i, conditions in enumerate(weather_conditions):
+    decision = play_tennis(conditions['outlook'], conditions['temperature'], conditions['humidity'], conditions['windy'])
+    print(f"Test case {i+1}: {conditions} -> Play Tennis: {decision}")
